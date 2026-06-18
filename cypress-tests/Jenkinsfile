@@ -1,0 +1,78 @@
+pipeline {
+    agent {
+        docker {
+            image 'cypress/browsers:latest'
+            reuseNode true
+        }
+    }
+
+    triggers {
+        // Poll SCM every 5 minutes
+        pollSCM('H/5 * * * *')
+        // GitHub webhook trigger
+        githubPush()
+    }
+
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '10'))
+        timeout(time: 30, unit: 'MINUTES')
+        timestamps()
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Install Dependencies') {
+            steps {
+                dir('cypress-tests') {
+                    sh 'npm ci'
+                }
+            }
+        }
+
+        stage('Run Cypress Tests') {
+            steps {
+                dir('cypress-tests') {
+                    sh 'npx cypress run --browser chrome'
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            // Publish JUnit test results from Cypress
+            junit testResults: 'cypress-tests/cypress/results/*.xml', allowEmptyResults: true
+
+            // Archive Cypress videos and screenshots
+            archiveArtifacts artifacts: 'cypress-tests/cypress/videos/**/*', allowEmptyArchive: true
+            archiveArtifacts artifacts: 'cypress-tests/cypress/screenshots/**/*', allowEmptyArchive: true
+
+            // Publish Cypress test report
+            publishHTML(target: [
+                allowMissing: true,
+                alwaysLinkToLastBuild: true,
+                keepAll: true,
+                reportDir: 'cypress-tests/cypress/results',
+                reportFiles: '*.xml',
+                reportName: 'Cypress Test Report'
+            ])
+        }
+
+        success {
+            echo '✅ Cypress tests passed successfully!'
+        }
+
+        failure {
+            echo '❌ Cypress tests failed! Check the report for details.'
+        }
+
+        cleanup {
+            cleanWs()
+        }
+    }
+}

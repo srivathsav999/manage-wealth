@@ -1,0 +1,28 @@
+# Dependencies
+node_modules/
+package-lock.json
+
+# Build outputs
+dist/
+target/
+
+# IDE
+.idea/
+.vscode/
+*.iml
+.DS_Store
+
+# Environment
+.env
+
+# Logs
+*.log
+
+# Cypress artifacts (generated during test runs)
+cypress-tests/cypress/videos/
+cypress-tests/cypress/screenshots/
+cypress-tests/cypress/results/
+
+# JMeter results
+jmeter-tests/results.jtl
+jmeter-tests/jmeter.log

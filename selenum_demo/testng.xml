@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<suite name="ManageMoney Test Suite" verbose="2">
+
+    <test name="Home Page Tests">
+        <classes>
+            <class name="tests.HomePageTest"/>
+        </classes>
+    </test>
+
+    <test name="Registration Tests">
+        <classes>
+            <class name="tests.RegistrationTest"/>
+        </classes>
+    </test>
+
+    <test name="Login Tests">
+        <classes>
+            <class name="tests.LoginTest"/>
+        </classes>
+    </test>
+
+    <test name="Navigation Tests">
+        <classes>
+            <class name="tests.NavigationTest"/>
+        </classes>
+    </test>
+
+    <test name="Add Account Form Tests">
+        <classes>
+            <class name="tests.AddAccountFormTest"/>
+        </classes>
+    </test>
+
+    <test name="Page Routing Tests">
+        <classes>
+            <class name="tests.PageRoutingTest"/>
+        </classes>
+    </test>
+
+</suite>

@@ -13,7 +13,7 @@ public class LoginTestValid {
         WebDriver driver = new ChromeDriver();
 
         // Open login page
-        driver.get("http://localhost:8090/login");
+        driver.get("http://localhost:5173/login");
 
         // Maximize window
         driver.manage().window().maximize();

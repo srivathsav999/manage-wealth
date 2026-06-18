@@ -1,0 +1,16 @@
+{
+  "name": "manage-money-cypress-tests",
+  "version": "1.0.0",
+  "description": "Cypress E2E tests for ManageMoney application",
+  "scripts": {
+    "cy:open": "cypress open",
+    "cy:run": "cypress run",
+    "cy:run:headed": "cypress run --headed",
+    "test": "cypress run"
+  },
+  "devDependencies": {
+    "cypress": "^13.13.0",
+    "cypress-multi-reporters": "^1.6.4",
+    "mocha-junit-reporter": "^2.2.1"
+  }
+}

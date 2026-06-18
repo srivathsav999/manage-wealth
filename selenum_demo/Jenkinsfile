@@ -1,0 +1,83 @@
+pipeline {
+    agent {
+        docker {
+            image 'maven:3.9.9-eclipse-temurin-17'
+            reuseNode true
+        }
+    }
+
+    triggers {
+        // Poll SCM every 5 minutes for changes
+        pollSCM('H/5 * * * *')
+        // GitHub webhook trigger (requires GitHub plugin in Jenkins)
+        githubPush()
+    }
+
+    options {
+        // Discard old builds to save disk space
+        buildDiscarder(logRotator(numToKeepStr: '10'))
+        // Timeout after 30 minutes
+        timeout(time: 30, unit: 'MINUTES')
+        // Add timestamps to console output
+        timestamps()
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                // GitHub SCM checkout
+                checkout scm
+            }
+        }
+
+        stage('Build & Test') {
+            steps {
+                dir('selenum_demo') {
+                    // Always run mvn clean test before pushing to GitHub
+                    sh 'mvn -Dmaven.test.failure.ignore=true -Dheadless=true clean test'
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            // Publish TestNG results for TestNG Reports Analyzer dashboard
+            junit testResults: 'selenum_demo/target/surefire-reports/*.xml', allowEmptyResults: true
+
+            // Publish TestNG HTML Report (TestNG Reports Analyzer plugin)
+            publishHTML(target: [
+                allowMissing: true,
+                alwaysLinkToLastBuild: true,
+                keepAll: true,
+                reportDir: 'selenum_demo/target/surefire-reports',
+                reportFiles: 'index.html',
+                reportName: 'TestNG Report'
+            ])
+
+            // Archive test results artifacts
+            archiveArtifacts artifacts: 'selenum_demo/target/surefire-reports/**/*', allowEmptyArchive: true
+        }
+
+        success {
+            echo '✅ Selenium tests passed successfully!'
+        }
+
+        failure {
+            echo '❌ Selenium tests failed! Check the TestNG report for details.'
+            // Send email notification on failure (configure SMTP in Jenkins)
+            // mail to: 'your-email@example.com',
+            //      subject: "FAILED: Selenium Tests - Build #${env.BUILD_NUMBER}",
+            //      body: "Selenium tests failed. Check: ${env.BUILD_URL}"
+        }
+
+        unstable {
+            echo '⚠️ Selenium tests completed with some failures.'
+        }
+
+        cleanup {
+            // Clean up workspace
+            cleanWs()
+        }
+    }
+}

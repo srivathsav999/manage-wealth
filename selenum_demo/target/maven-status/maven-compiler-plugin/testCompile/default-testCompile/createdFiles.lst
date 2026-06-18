@@ -1,0 +1,7 @@
+tests/AddAccountFormTest.class
+tests/LoginTest.class
+tests/NavigationTest.class
+tests/HomePageTest.class
+tests/RegistrationTest.class
+tests/PageRoutingTest.class
+tests/BaseTest.class
