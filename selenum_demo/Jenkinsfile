@@ -1,24 +1,25 @@
 pipeline {
     agent any
 
+    environment {
+        // Jenkins doesn't inherit the user's shell PATH, so we add it explicitly
+        PATH = "/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:${env.PATH}"
+    }
+
     triggers {
         // Poll SCM every 5 minutes for changes
         pollSCM('H/5 * * * *')
     }
 
     options {
-        // Discard old builds to save disk space
         buildDiscarder(logRotator(numToKeepStr: '10'))
-        // Timeout after 30 minutes
         timeout(time: 30, unit: 'MINUTES')
-        // Add timestamps to console output
         timestamps()
     }
 
     stages {
         stage('Checkout') {
             steps {
-                // GitHub SCM checkout
                 checkout scm
             }
         }
@@ -35,18 +36,12 @@ pipeline {
 
     post {
         always {
-            // Publish TestNG results for TestNG Reports Analyzer dashboard
+            // Publish TestNG results for dashboard
             junit testResults: 'selenum_demo/target/surefire-reports/*.xml', allowEmptyResults: true
 
-            // Publish TestNG HTML Report (TestNG Reports Analyzer plugin)
-            publishHTML(target: [
-                allowMissing: true,
-                alwaysLinkToLastBuild: true,
-                keepAll: true,
-                reportDir: 'selenum_demo/target/surefire-reports',
-                reportFiles: 'index.html',
-                reportName: 'TestNG Report'
-            ])
+            // TestNG Reports Analyzer (testNG plugin is installed)
+            testNG(reportFilenamePattern: 'selenum_demo/target/surefire-reports/testng-results.xml',
+                   showFailedBuilds: true)
 
             // Archive test results artifacts
             archiveArtifacts artifacts: 'selenum_demo/target/surefire-reports/**/*', allowEmptyArchive: true

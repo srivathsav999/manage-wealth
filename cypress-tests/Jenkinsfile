@@ -1,8 +1,11 @@
 pipeline {
     agent any
 
+    environment {
+        PATH = "/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:${env.PATH}"
+    }
+
     triggers {
-        // Poll SCM every 5 minutes
         pollSCM('H/5 * * * *')
     }
 
@@ -38,10 +41,7 @@ pipeline {
 
     post {
         always {
-            // Publish JUnit test results from Cypress
             junit testResults: 'cypress-tests/cypress/results/*.xml', allowEmptyResults: true
-
-            // Archive Cypress videos and screenshots
             archiveArtifacts artifacts: 'cypress-tests/cypress/videos/**/*', allowEmptyArchive: true
             archiveArtifacts artifacts: 'cypress-tests/cypress/screenshots/**/*', allowEmptyArchive: true
         }
