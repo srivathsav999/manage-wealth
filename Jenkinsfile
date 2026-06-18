@@ -4,8 +4,6 @@ pipeline {
     triggers {
         // Poll SCM every 5 minutes for changes
         pollSCM('H/5 * * * *')
-        // GitHub webhook trigger
-        githubPush()
     }
 
     options {
@@ -23,12 +21,6 @@ pipeline {
         }
 
         stage('Selenium Tests') {
-            agent {
-                docker {
-                    image 'maven:3.9.9-eclipse-temurin-17'
-                    reuseNode true
-                }
-            }
             steps {
                 dir('selenum_demo') {
                     // Always run mvn clean test
@@ -55,15 +47,9 @@ pipeline {
         }
 
         stage('Cypress Tests') {
-            agent {
-                docker {
-                    image 'cypress/browsers:latest'
-                    reuseNode true
-                }
-            }
             steps {
                 dir('cypress-tests') {
-                    sh 'npm ci'
+                    sh 'npm ci || npm install'
                     sh 'npx cypress run --browser chrome'
                 }
             }
@@ -80,23 +66,15 @@ pipeline {
 
     post {
         success {
-            echo '✅ All tests (Selenium + Cypress) passed successfully!'
+            echo 'All tests (Selenium + Cypress) passed successfully!'
         }
 
         failure {
-            echo '❌ Some tests failed! Check individual stage reports for details.'
-            // Uncomment to enable email notifications:
-            // mail to: 'your-email@example.com',
-            //      subject: "FAILED: ManageMoney Tests - Build #${env.BUILD_NUMBER}",
-            //      body: "Tests failed. Check: ${env.BUILD_URL}"
+            echo 'Some tests failed! Check individual stage reports for details.'
         }
 
         unstable {
-            echo '⚠️ Tests completed with some failures.'
-        }
-
-        cleanup {
-            cleanWs()
+            echo 'Tests completed with some failures.'
         }
     }
 }

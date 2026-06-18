@@ -1,16 +1,9 @@
 pipeline {
-    agent {
-        docker {
-            image 'maven:3.9.9-eclipse-temurin-17'
-            reuseNode true
-        }
-    }
+    agent any
 
     triggers {
         // Poll SCM every 5 minutes for changes
         pollSCM('H/5 * * * *')
-        // GitHub webhook trigger (requires GitHub plugin in Jenkins)
-        githubPush()
     }
 
     options {
@@ -33,7 +26,7 @@ pipeline {
         stage('Build & Test') {
             steps {
                 dir('selenum_demo') {
-                    // Always run mvn clean test before pushing to GitHub
+                    // Always run mvn clean test before sending to GitHub
                     sh 'mvn -Dmaven.test.failure.ignore=true -Dheadless=true clean test'
                 }
             }
@@ -60,24 +53,15 @@ pipeline {
         }
 
         success {
-            echo '✅ Selenium tests passed successfully!'
+            echo 'Selenium tests passed successfully!'
         }
 
         failure {
-            echo '❌ Selenium tests failed! Check the TestNG report for details.'
-            // Send email notification on failure (configure SMTP in Jenkins)
-            // mail to: 'your-email@example.com',
-            //      subject: "FAILED: Selenium Tests - Build #${env.BUILD_NUMBER}",
-            //      body: "Selenium tests failed. Check: ${env.BUILD_URL}"
+            echo 'Selenium tests failed! Check the TestNG report for details.'
         }
 
         unstable {
-            echo '⚠️ Selenium tests completed with some failures.'
-        }
-
-        cleanup {
-            // Clean up workspace
-            cleanWs()
+            echo 'Selenium tests completed with some failures.'
         }
     }
 }

@@ -1,16 +1,9 @@
 pipeline {
-    agent {
-        docker {
-            image 'cypress/browsers:latest'
-            reuseNode true
-        }
-    }
+    agent any
 
     triggers {
         // Poll SCM every 5 minutes
         pollSCM('H/5 * * * *')
-        // GitHub webhook trigger
-        githubPush()
     }
 
     options {
@@ -29,7 +22,7 @@ pipeline {
         stage('Install Dependencies') {
             steps {
                 dir('cypress-tests') {
-                    sh 'npm ci'
+                    sh 'npm ci || npm install'
                 }
             }
         }
@@ -51,28 +44,14 @@ pipeline {
             // Archive Cypress videos and screenshots
             archiveArtifacts artifacts: 'cypress-tests/cypress/videos/**/*', allowEmptyArchive: true
             archiveArtifacts artifacts: 'cypress-tests/cypress/screenshots/**/*', allowEmptyArchive: true
-
-            // Publish Cypress test report
-            publishHTML(target: [
-                allowMissing: true,
-                alwaysLinkToLastBuild: true,
-                keepAll: true,
-                reportDir: 'cypress-tests/cypress/results',
-                reportFiles: '*.xml',
-                reportName: 'Cypress Test Report'
-            ])
         }
 
         success {
-            echo '✅ Cypress tests passed successfully!'
+            echo 'Cypress tests passed successfully!'
         }
 
         failure {
-            echo '❌ Cypress tests failed! Check the report for details.'
-        }
-
-        cleanup {
-            cleanWs()
+            echo 'Cypress tests failed! Check the report for details.'
         }
     }
 }
