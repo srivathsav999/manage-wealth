@@ -279,3 +279,18 @@ To deploy this application, you'll need:
 ### Production Build (Frontend)
 
 ```bash
+
+
+
+mvn test -Dtest=tests.HomePageTest -Dslow=true -Ddelay=500
+mvn test -Dtest=tests.RegistrationTest -Dslow=true -Ddelay=500
+mvn test -Dtest=tests.LoginTest -Dslow=true -Ddelay=500
+mvn test -Dtest=tests.NavigationTest -Dslow=true -Ddelay=500
+mvn test -Dtest=tests.AddAccountFormTest -Dslow=true -Ddelay=500
+mvn test -Dtest=tests.PageRoutingTest -Dslow=true -Ddelay=500
+
+
+
+npx cypress open
+
+jmeter -t jmeter-tests/ManageMoney_LoadTest.jmx

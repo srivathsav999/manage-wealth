@@ -2,6 +2,7 @@ package tests;
 
 import io.github.bonigarcia.wdm.WebDriverManager;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -13,6 +14,7 @@ import java.time.Duration;
 /**
  * Base test class for all Selenium tests.
  * Provides WebDriver setup and teardown using TestNG lifecycle annotations.
+ * Use -Dslow=true for presentation mode (adds delays between actions).
  */
 public class BaseTest {
 
@@ -20,6 +22,10 @@ public class BaseTest {
     protected WebDriverWait wait;
     protected static final String BASE_URL = "http://localhost:5173";
     protected static final int WAIT_TIMEOUT_SECONDS = 10;
+
+    // Slow mode delay in milliseconds (for presentations)
+    protected static final boolean SLOW_MODE = "true".equalsIgnoreCase(System.getProperty("slow", "false"));
+    protected static final int SLOW_DELAY = Integer.parseInt(System.getProperty("delay", "2000"));
 
     @BeforeMethod
     public void setUp() {
@@ -46,6 +52,9 @@ public class BaseTest {
 
     @AfterMethod
     public void tearDown() {
+        if (SLOW_MODE) {
+            slowDown(); // Pause before closing browser so you can see the final state
+        }
         if (driver != null) {
             driver.quit();
         }
@@ -57,5 +66,19 @@ public class BaseTest {
      */
     protected void navigateTo(String path) {
         driver.get(BASE_URL + path);
+        slowDown();
+    }
+
+    /**
+     * Adds a delay in slow mode for presentation purposes.
+     */
+    protected void slowDown() {
+        if (SLOW_MODE) {
+            try {
+                Thread.sleep(SLOW_DELAY);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
     }
 }
